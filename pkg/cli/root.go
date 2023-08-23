@@ -21,6 +21,7 @@ func NewRootCommand() (*cobra.Command, error) {
 		newLayerCommand(),
 		newExtractCommand(),
 		newRemixCommand(),
+		newServeCommand(),
 		newZstdCommand(),
 	)
 	logs.Warn = log.New(os.Stderr, "gcr WARN: ", log.LstdFlags)
