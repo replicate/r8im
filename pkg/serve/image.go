@@ -3,8 +3,11 @@ package serve
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/anotherjesse/r8im/pkg/images"
+	"github.com/google/go-containerregistry/pkg/crane"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/gorilla/mux"
 )
 
@@ -15,14 +18,40 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	version := vars["version"]
 
 	imageName := fmt.Sprintf("r8.im/%s/%s@sha256:%s", user, model, version)
-	layers, err := images.Layers(imageName, global_auth)
+
+	user_image, err := crane.Pull(imageName, crane.WithAuth(global_auth))
+	if err != nil {
+		fmt.Fprintf(w, "Error pulling image: %s", err)
+	}
+
+	layers, err := images.LayersForImage(user_image)
 	if err != nil {
 		fmt.Fprintf(w, "Error: %s", err)
 		return
 	}
 
+	cfg, err := user_image.ConfigFile()
+	if err != nil {
+		fmt.Fprintf(w, "Error: %s", err)
+	}
+	env := cfg.Config.Env
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprintf(w, "<h1>%s</h1>", imageName)
+
+	fmt.Fprintf(w, "<h2>Environment</h2>")
+	fmt.Fprintf(w, "<table>")
+	fmt.Fprintf(w, "<tr>")
+	fmt.Fprintf(w, "<th>Key</th>")
+	fmt.Fprintf(w, "<th>Value</th>")
+	fmt.Fprintf(w, "</tr>")
+	for _, e := range env {
+		parts := strings.SplitN(e, "=", 2)
+		fmt.Fprintf(w, "<tr>")
+		fmt.Fprintf(w, "<td>%s</td>", parts[0])
+		fmt.Fprintf(w, "<td>%s</td>", parts[1])
+		fmt.Fprintf(w, "</tr>")
+	}
 
 	fmt.Fprintf(w, "<h2>Layers</h2>")
 
@@ -42,4 +71,8 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(w, "</table>")
 
+}
+
+func LayersForImage(image v1.Image) {
+	panic("unimplemented")
 }

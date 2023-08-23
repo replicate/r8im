@@ -38,7 +38,7 @@ func layerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if layer.Size > 1_000_000 {
+	if layer.Size > 30_000_000 {
 		fmt.Fprintf(w, "Error: layer too big to show")
 		return
 	}
