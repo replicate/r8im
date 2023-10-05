@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/spf13/cobra"
 
-	"github.com/anotherjesse/r8im/pkg/auth"
+	r8auth "github.com/anotherjesse/r8im/pkg/auth"
 	"github.com/anotherjesse/r8im/pkg/serve"
 )
 
@@ -36,15 +36,20 @@ func serveCommmand(cmd *cobra.Command, args []string) error {
 	if sToken == "" {
 		sToken = os.Getenv("COG_TOKEN")
 	}
+	var auth authn.Authenticator
 
-	u, err := auth.VerifyCogToken(sRegistry, sToken)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "authentication error, invalid token or registry host error")
-		return err
+	if sToken == "" {
+		auth = authn.Anonymous
+	} else {
+		u, err := r8auth.VerifyCogToken(sRegistry, sToken)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "authentication error, invalid token or registry host error")
+			return err
+		}
+		auth = authn.FromConfig(authn.AuthConfig{Username: u, Password: sToken})
 	}
-	auth := authn.FromConfig(authn.AuthConfig{Username: u, Password: sToken})
 
-	err = serve.Start(port, auth)
+	err := serve.Start(port, auth)
 
 	if err != nil {
 		return err
