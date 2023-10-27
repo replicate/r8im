@@ -39,6 +39,12 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprintf(w, "<h1>%s</h1>", imageName)
 
+	fmt.Fprintf(w, "<a href=\"https://replicate.com/\">replicate.com</a>/")
+	fmt.Fprintf(w, "<a href=\"https://replicate.com/%s\">%s</a>/", user, user)
+	fmt.Fprintf(w, "<a href=\"https://replicate.com/%s/%s\">%s</a>/", user, model, model)
+	fmt.Fprintf(w, "<a href=\"https://replicate.com/%s/%s/versions\">versions</a>/", user, model)
+	fmt.Fprintf(w, "<a href=\"https://replicate.com/%s/%s/versions/%s\">%s</a>", user, model, version, version)
+
 	fmt.Fprintf(w, "<h2>Environment</h2>")
 	fmt.Fprintf(w, "<table>")
 	fmt.Fprintf(w, "<tr>")
