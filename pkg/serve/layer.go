@@ -50,6 +50,11 @@ func layerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprintf(w, "%s > %s > ", user, model)
+	fmt.Fprintf(w, "<a href=\"/%s/%s:%s\">%s</a> > ", user, model, version, version)
+	fmt.Fprintf(w, "<a href=\"/%s/%s:%s/%s\">%s</a>", user, model, version, layerDigest, layerDigest)
+	fmt.Fprintf(w, "<dl><dt>Size</dt><dd>%s</dd><dt>Command</dt><dd><pre>%s</pre></dd></dl>", ByteCountSI(layer.Size), layer.Command)
 	showFiles(w, rc, basePath)
 }
 
@@ -57,7 +62,6 @@ func showFiles(w http.ResponseWriter, rc io.ReadCloser, basePath string) {
 
 	tr := tar.NewReader(rc)
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprintf(w, "<h2>Files</h2>")
 	fmt.Fprintf(w, "<table>")
