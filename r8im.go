@@ -8,6 +8,10 @@ import (
 )
 
 func main() {
+	if len(os.Args) == 1 {
+		os.Args = append(os.Args, "serve")
+	}
+
 	cmd, err := cli.NewRootCommand()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

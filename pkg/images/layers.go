@@ -20,8 +20,6 @@ type Layer struct {
 }
 
 func Layers(imageName string, auth authn.Authenticator) ([]Layer, error) {
-	results := make([]Layer, 0)
-
 	var base v1.Image
 	var err error
 
@@ -34,7 +32,13 @@ func Layers(imageName string, auth authn.Authenticator) ([]Layer, error) {
 	}
 	fmt.Fprintln(os.Stderr, "pulling took", time.Since(start))
 
-	layers, err := base.Layers()
+	return LayersForImage(base)
+}
+
+func LayersForImage(image v1.Image) ([]Layer, error) {
+	results := make([]Layer, 0)
+
+	layers, err := image.Layers()
 	if err != nil {
 		return nil, fmt.Errorf("getting layers %w", err)
 	}
@@ -63,7 +67,7 @@ func Layers(imageName string, auth authn.Authenticator) ([]Layer, error) {
 	}
 
 	// Grab the commands from the history
-	cfg, nil := base.ConfigFile()
+	cfg, nil := image.ConfigFile()
 	if err != nil {
 		return results, fmt.Errorf("getting config %w", err)
 	}
@@ -75,9 +79,9 @@ func Layers(imageName string, auth authn.Authenticator) ([]Layer, error) {
 
 		s := strings.TrimPrefix(h.CreatedBy, "/bin/sh -c ")
 		s = strings.TrimPrefix(s, "#(nop) ")
-		if len(s) > 40 {
-			s = s[:40]
-		}
+		// if len(s) > 40 {
+		// 	s = s[:40]
+		// }
 		results[idx].Command = s
 		idx++
 	}
